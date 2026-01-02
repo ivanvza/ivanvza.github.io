@@ -1,7 +1,5 @@
 ---
-title: My GitHub Pages Notebook!
+title: ivanvza
 ---
 
-Hello world!
-
-Test
+Notes on AI, hacking, LLMs, and building things.

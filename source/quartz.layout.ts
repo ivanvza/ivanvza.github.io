@@ -16,6 +16,7 @@ export const sharedPageComponents: SharedLayout = {
     links: {
       GitHub: "https://github.com/ivanvza",
       X: "https://x.com/chililuck",
+      RSS: "/index.xml",
     },
   }),
 }

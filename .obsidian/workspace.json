@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "df8c20c74c2a6af5",
+        "id": "bbb286bf473243eb",
         "type": "tabs",
         "children": [
           {
-            "id": "6d9505f70b80c847",
+            "id": "8f50d9cbcc188bf3",
             "type": "leaf",
             "state": {
               "type": "split-diff-view",
@@ -192,15 +192,15 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "ee8d940f09ce5535",
+  "active": "8f50d9cbcc188bf3",
   "lastOpenFiles": [
+    "source/content/posts/LokiBot Analysis.md",
     "source/content/index.md",
     "source/content/CNAME",
     "source/docs/build.md",
     "source/docs/configuration.md",
     "source/content/posts/Building an AI Guardrail with Embeddings.md",
     "source/docs/features/Mermaid diagrams.md",
-    "source/content/posts/LokiBot Analysis.md",
     "2026-01-02.md",
     "source/docs/features/upcoming features.md",
     "source/docs/layout.md",
@@ -220,7 +220,6 @@
     "source/docs/upgrading.md",
     "source/docs/tags/plugin.md",
     "source/docs/tags/component.md",
-    "source/docs/plugins/TableOfContents.md",
     "source/docs/images/quartz-layout-tablet.png",
     "source/docs/images/quartz-layout-mobile.png",
     "source/docs/images/quartz-layout-desktop.png",

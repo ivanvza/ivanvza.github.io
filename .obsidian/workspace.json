@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "bbb286bf473243eb",
+        "id": "416d643e550332f9",
         "type": "tabs",
         "children": [
           {
-            "id": "8f50d9cbcc188bf3",
+            "id": "48183875736b462d",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -194,10 +194,12 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "8f50d9cbcc188bf3",
+  "active": "48183875736b462d",
   "lastOpenFiles": [
-    "source/content/index.md",
     "source/content/posts/LokiBot Analysis.md",
+    "source/content/index.md",
+    "source/quartz/components/AllPosts.tsx",
+    "source/quartz/plugins/transformers/indexlinks.ts",
     "source/content/CNAME",
     "source/docs/build.md",
     "source/docs/configuration.md",

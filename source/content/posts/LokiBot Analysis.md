@@ -1,10 +1,11 @@
 ---
 title: LokiBot Analysis
-date: 2026-01-02
+date: 2022-05-08
 tags:
   - malware
   - reverse-engineering
   - security
+draft: false
 ---
 
 ## Brief Introduction

@@ -1,3 +1,12 @@
+---
+title: LokiBot Analysis
+date: 2026-01-02
+tags:
+  - malware
+  - reverse-engineering
+  - security
+---
+
 ## Brief Introduction
 The initial delivery was via email, however this post is about analyzing the delivery stages, malware and some SECOPS fails from the LokiBot threat actors.
 

@@ -155,13 +155,12 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "source/content/index.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of index"
+              "title": "Outline"
             }
           },
           {
@@ -193,7 +192,7 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "81303bfbf59ee01c",
+  "active": "ee8d940f09ce5535",
   "lastOpenFiles": [
     "source/content/index.md",
     "source/content/CNAME",

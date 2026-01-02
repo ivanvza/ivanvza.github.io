@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "source/content/category-folder/qwe.md",
+                "file": "source/content/category-folder/LokiBot Analysis.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "qwe"
+              "title": "LokiBot Analysis"
             }
           }
         ],
@@ -195,13 +195,14 @@
       "daily-notes:Open today's daily note": false,
       "templates:Insert template": false,
       "command-palette:Open command palette": false,
-      "bases:Create new base": false
+      "bases:Create new base": false,
+      "obsidian-git:Open Git source control": false
     }
   },
-  "active": "81303bfbf59ee01c",
+  "active": "d49879f5c91ebcad",
   "lastOpenFiles": [
     "source/content/category-folder/Some note.md",
-    "source/content/category-folder/qwe.md",
+    "source/content/category-folder/LokiBot Analysis.md",
     "source/content/index.md"
   ]
 }

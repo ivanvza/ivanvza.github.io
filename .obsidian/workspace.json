@@ -11,14 +11,14 @@
             "id": "8f50d9cbcc188bf3",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "markdown",
               "state": {
-                "aFile": ".obsidian/workspace.json",
-                "bFile": ".obsidian/workspace.json",
-                "aRef": ""
+                "file": "source/content/index.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "diff",
-              "title": "Diff: workspace.json"
+              "icon": "lucide-file",
+              "title": "index"
             }
           }
         ]
@@ -113,11 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
+                "file": "source/content/index.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links"
+              "title": "Outgoing links from index"
             }
           },
           {
@@ -155,12 +156,13 @@
             "state": {
               "type": "outline",
               "state": {
+                "file": "source/content/index.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline"
+              "title": "Outline of index"
             }
           },
           {
@@ -194,8 +196,8 @@
   },
   "active": "8f50d9cbcc188bf3",
   "lastOpenFiles": [
-    "source/content/posts/LokiBot Analysis.md",
     "source/content/index.md",
+    "source/content/posts/LokiBot Analysis.md",
     "source/content/CNAME",
     "source/docs/build.md",
     "source/docs/configuration.md",

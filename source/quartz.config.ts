@@ -12,7 +12,7 @@ const config: QuartzConfig = {
     pageTitleSuffix: "",
     enableSPA: true,
     enablePopovers: true,
-    analytics: null,
+    analytics: { provider: 'umami', host: 'ivanvza.github.io', websiteId: 'be56f9f3-15a0-4ab9-a2f6-781e2ebc465d' },
     locale: "en-US",
     baseUrl: "ivanvza.github.io",
     ignorePatterns: ["private", "templates", ".obsidian"],

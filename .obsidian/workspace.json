@@ -4,17 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "416d643e550332f9",
+        "id": "978c8b917acbce66",
         "type": "tabs",
         "children": [
           {
-            "id": "48183875736b462d",
+            "id": "d4814f269ae4f2df",
             "type": "leaf",
             "state": {
-              "type": "graph",
+              "type": "empty",
               "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Graph view"
+              "icon": "lucide-file",
+              "title": "New tab"
             }
           }
         ]
@@ -190,8 +190,10 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "48183875736b462d",
+  "active": "ee8d940f09ce5535",
   "lastOpenFiles": [
+    "source/content/posts/Building an AI Guardrail with Embeddings.md",
+    "source/quartz/plugins/transformers/injectPosts.ts",
     "source/content/index.md",
     "source/content/posts/LokiBot Analysis.md",
     "source/quartz/components/AllPosts.tsx",
@@ -199,7 +201,6 @@
     "source/content/CNAME",
     "source/docs/build.md",
     "source/docs/configuration.md",
-    "source/content/posts/Building an AI Guardrail with Embeddings.md",
     "source/docs/features/Mermaid diagrams.md",
     "2026-01-02.md",
     "source/docs/features/upcoming features.md",

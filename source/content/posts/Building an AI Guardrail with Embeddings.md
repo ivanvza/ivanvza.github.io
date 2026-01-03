@@ -7,6 +7,7 @@ tags:
   - security
   - prompt-injection
   - embeddings
+  - LLM
 draft: false
 ---
 

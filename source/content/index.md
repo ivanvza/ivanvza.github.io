@@ -5,6 +5,5 @@ tags:
   - security
   - AI
 ---
-[[Building an AI Guardrail with Embeddings]]
 
-[[LokiBot Analysis]]
+<!-- INJECT_ALL_POSTS -->

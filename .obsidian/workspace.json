@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "source/content/posts/Building an AI Guardrail with Embeddings Part 2.md",
+                "file": "source/content/AI Security/Building an AI Guardrail with Embeddings.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Building an AI Guardrail with Embeddings Part 2"
+              "title": "Building an AI Guardrail with Embeddings"
             }
           }
         ]
@@ -78,7 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 420.5
   },
   "right": {
     "id": "2fa08b043f668ee0",
@@ -196,11 +196,13 @@
   },
   "active": "d4814f269ae4f2df",
   "lastOpenFiles": [
-    "source/content/posts/Building an AI Guardrail with Embeddings Part 2.md",
-    "source/content/posts/Building an AI Guardrail with Embeddings.md",
-    "source/quartz/plugins/transformers/injectPosts.ts",
+    "source/content/AI Security/Building an AI Guardrail with Embeddings Part 2.md",
+    "source/content/Malware/LokiBot Analysis.md",
     "source/content/index.md",
-    "source/content/posts/LokiBot Analysis.md",
+    "source/content/Malware",
+    "source/content/AI Security",
+    "source/content/AI Security/Building an AI Guardrail with Embeddings.md",
+    "source/quartz/plugins/transformers/injectPosts.ts",
     "source/quartz/components/AllPosts.tsx",
     "source/quartz/plugins/transformers/indexlinks.ts",
     "source/content/CNAME",
@@ -225,7 +227,6 @@
     "source/docs/showcase.md",
     "source/docs/upgrading.md",
     "source/docs/tags/plugin.md",
-    "source/docs/tags/component.md",
     "source/docs/images/quartz-layout-tablet.png",
     "source/docs/images/quartz-layout-mobile.png",
     "source/docs/images/quartz-layout-desktop.png",

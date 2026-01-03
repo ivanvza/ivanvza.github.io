@@ -11,7 +11,7 @@ tags:
 draft: false
 ---
 
-In [Part 1](/posts/building-an-ai-guardrail-with-embeddings), we built a basic prompt injection detector using BGE embeddings and three MLP classifier heads. It worked, but we used toy data and a simple architecture.
+In [[Building an AI Guardrail with Embeddings]], we built a basic prompt injection detector using BGE embeddings and three MLP classifier heads. It worked, but we used toy data and a simple architecture.
 
 In this post, we'll level up: real training data from HuggingFace, advanced architectures, better training techniques, and ensemble voting. We'll also share a surprising finding: our fancy CNN architecture didn't beat the simple MLP.
 
@@ -31,10 +31,7 @@ flowchart TB
     end
 ```
 
-Let's dive in.
-
 ---
-
 ## Getting Real Data from HuggingFace
 
 Training a threat detector on 20 hand-labeled examples won't cut it. We need thousands of real examples covering jailbreaks, prompt injections, toxic content, and normal conversations.
@@ -185,13 +182,13 @@ The idea: prompt injections have patterns at different lengths. Short patterns l
 
 ### The Results
 
-| Architecture | Parameters | Speed | Accuracy |
-|--------------|-----------|-------|----------|
-| Simple MLP (Part 1) | ~100K | Fast | 93-94% |
-| Multi-Scale CNN | ~40K | Fast | ~94% |
-| Transformer | ~400K | Slow | ~92% |
-| Deep MLP | ~430K | Medium | ~93% |
-| Hybrid | ~200K | Medium | ~93% |
+| Architecture        | Parameters | Speed  | Accuracy |
+| ------------------- | ---------- | ------ | -------- |
+| Simple MLP (Part 1) | ~100K      | Fast   | 93-94%   |
+| Multi-Scale CNN     | ~40K       | Fast   | ~94%     |
+| Transformer         | ~400K      | Slow   | ~92%     |
+| Deep MLP            | ~430K      | Medium | ~93%     |
+| Hybrid              | ~200K      | Medium | ~93%     |
 
 **The surprise:** The simple MLP held its own. Despite our fancy multi-scale CNN with attention fusion, we only gained ~1% accuracy. The Transformer actually performed worse.
 
@@ -521,7 +518,6 @@ For security-critical applications, we'd rather have false alarms than missed th
 ### Decision Verdicts
 
 Our final voting engine returns one of:
-
 - **THREAT** (confidence >= 0.85): Block immediately
 - **LIKELY_THREAT** (confidence >= 0.65): Block, log for review
 - **SUSPICIOUS** (confidence >= 0.5): Flag for human review
@@ -548,7 +544,6 @@ Voting Result:
 ---
 
 ## Results & What We Learned
-
 After all these improvements, here's where we landed:
 
 ### Final Performance
@@ -561,25 +556,9 @@ After all these improvements, here's where we landed:
 | severity Accuracy | 83.3% |
 | Inference Speed | ~2.4ms per sample |
 | Throughput (batch-32) | 1,346 req/s |
-
-### Key Learnings
-
-1. **Simple architectures can beat complex ones.** Our Multi-Scale CNN didn't significantly outperform the basic MLP. With limited data, complexity hurts more than helps.
-
-2. **Focal loss is essential for imbalanced data.** Without it, the model ignores rare threat categories.
-
-3. **Calibration enables meaningful voting.** Uncalibrated probabilities can't be averaged or compared across heads.
-
-4. **Embedding augmentation is underrated.** +1.8% accuracy from simple tensor operations, no text processing needed.
-
-5. **Real data matters.** The jump from toy data to 20K HuggingFace examples made everything else possible.
-
----
-
 ## What's Next
 
 Some ideas we haven't explored yet:
-
 - **Quantization (INT8):** Shrink models to 25% size with minimal accuracy loss
 - **Active learning:** Identify edge cases and label them for retraining
 - **Multilingual support:** BGE has multilingual variants

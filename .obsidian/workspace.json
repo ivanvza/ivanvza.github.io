@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "source/content/AI Security/Building an AI Guardrail with Embeddings.md",
+                "file": "source/content/AI Security/Prompt Injection/Building an AI Guardrail with Embeddings.md",
                 "mode": "source",
                 "source": false
               },
@@ -196,12 +196,14 @@
   },
   "active": "d4814f269ae4f2df",
   "lastOpenFiles": [
-    "source/content/AI Security/Building an AI Guardrail with Embeddings Part 2.md",
+    "source/content/AI Security/Prompt Injection/Building an AI Guardrail with Embeddings Part 2.md",
+    "source/content/AI Security/Prompt Injection/Building an AI Guardrail with Embeddings.md",
+    "source/content/AI Security/Prompt Injection",
+    "Prompt",
     "source/content/Malware/LokiBot Analysis.md",
     "source/content/index.md",
     "source/content/Malware",
     "source/content/AI Security",
-    "source/content/AI Security/Building an AI Guardrail with Embeddings.md",
     "source/quartz/plugins/transformers/injectPosts.ts",
     "source/quartz/components/AllPosts.tsx",
     "source/quartz/plugins/transformers/indexlinks.ts",

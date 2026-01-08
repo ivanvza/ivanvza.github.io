@@ -366,6 +366,61 @@ What's happening here:
 
 This demonstrates the resilience of the skill discovery pattern—the agent self-corrects when it guesses wrong.
 
+### A quick run if the above flow
+```bash
+uv run main.py
+============================================================
+Skills Agent Chat
+Loaded 9 skills: file-utils, json-tools, web-fingerprint, network-recon, network-check, skill-creator, system-info, pentest-commands, web-scraper
+Type 'quit' or 'exit' to stop, 'skills' to list skills
+============================================================
+
+> Can you do a quick check to see if there is anything odd running on my system.
+
+== Acting Step ===
+  next_thought: To check if there is anything odd running on the system, I need to execute a command that lists currently running processes or checks for any unusual activity. Since I'll be using system-level commands, I'll start by activating the necessary skills that allow for system checks.
+  next_tool_name: activate_skill
+  next_tool_args: {'skill_name': 'system_monitor'}
+
+== Acting Step ===
+  next_thought: Since the 'system_monitor' skill is not available, I will list all available skills to find one that can help with checking for unusual activities on the system.
+  next_tool_name: list_skills
+  next_tool_args: {}
+
+== Acting Step ===
+  next_thought: The 'system-info' skill available can provide essential information regarding system processes and performance. I will activate this skill to gather information about running processes and check for any unusual activity on the system.
+  next_tool_name: activate_skill
+  next_tool_args: {'skill_name': 'system-info'}
+
+== Acting Step ===
+  next_thought: I have activated the 'system-info' skill, which can provide detailed information about running processes on the system. Next, I will use the `process_list.py` script to get a list of currently running processes and check for any unusual activities.
+  next_tool_name: run_skill_script
+  next_tool_args: {'skill_name': 'system-info', 'script_name': 'process_list.py', 'arguments': ''}
+
+== Acting Step ===
+  next_thought: I have successfully listed all running processes on the system. The output shows a total of 535 processes running, including various system and user processes. There doesn't appear to be anything unusual based on the list provided, but I will conclude the task without further investigation since the user did not specify any suspicious activity.
+  next_tool_name: finish
+  next_tool_args: {}
+
+== Acting Step ===
+  reasoning: I successfully utilized the `system-info` skill to execute a process listing on the user's system. The command returned a total of 535 running processes, which included various system and user-specific processes. No unusual or suspicious entries were immediately discernible from the provided list of processes. Therefore, based on the available data, there doesn't seem to be any odd activity on the system.
+  response: I have checked your system and found a total of 535 processes currently running. There doesn't seem to be anything unusual in the list of processes. If you have specific concerns or notice any symptoms of unusual activity, please let me know!
+
+== Acting Step ===
+  reasoning: I successfully utilized the `system-info` skill to execute a process listing on the user's system. The command returned a total of 535 running processes, which included various system and user-specific processes. No unusual or suspicious entries were immediately discernible from the provided list of processes. Therefore, based on the available data, there doesn't seem to be any odd activity on the system.
+  response: I have checked your system and found a total of 535 processes currently running. There doesn't seem to be anything unusual in the list of processes. If you have specific concerns or notice any symptoms of unusual activity, please let me know!
+
+== Acting Step ===
+  reasoning: I successfully utilized the `system-info` skill to execute a process listing on the user's system. The command returned a total of 535 running processes, which included various system and user-specific processes. No unusual or suspicious entries were immediately discernible from the provided list of processes. Therefore, based on the available data, there doesn't seem to be any odd activity on the system.
+  response: I have checked your system and found a total of 535 processes currently running. There doesn't seem to be anything unusual in the list of processes. If you have specific concerns or notice any symptoms of unusual activity, please let me know!
+
+============================================================
+
+I have checked your system and found a total of 535 processes currently running. There doesn't seem to be anything unusual in the list of processes. If you have specific concerns or notice any symptoms of unusual activity, please let me know!
+
+============================================================
+```
+
 ### The Raw ReAct Trace
 
 Here's the actual thought/action/observation loop:

@@ -8,7 +8,7 @@ tags:
   - DSPy
   - anthropic
   - skills
-draft: true
+draft: false
 ---
 
 Anthropic recently released their [Agent Skills specification](https://agentskills.io), a framework for teaching AI agents new capabilities through modular, reusable skill packages. It's the backbone of Claude Code's extensibility. We successfully replicated this architecture in DSPy, and in this post, I'll break down how it works and what we learned.

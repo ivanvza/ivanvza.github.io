@@ -107,7 +107,7 @@ flowchart LR
 
 This mirrors how humans work. You don't hold every procedure manual in working memory—you know *what* you can do, and look up *how* when needed.
 
-## Our DSPy Implementation
+## The DSPy Implementation
 
 I built [dspy-skills](https://github.com/ivanvza/dspy-skills), a full implementation of the Agent Skills spec for DSPy's ReAct agents. Here's the architecture:
 
@@ -246,7 +246,7 @@ def create_activate_skill_tool(manager: SkillManager) -> Callable:
 
 ### Secure Script Execution
 
-Skills can include executable scripts. This is powerful but dangerous. Our `ScriptExecutor` enforces security:
+Skills can include executable scripts. This is powerful but dangerous. The `ScriptExecutor` enforces security:
 
 ```python
 class ScriptExecutor:
@@ -325,7 +325,7 @@ result = agent(request="Check if api.example.com port 443 is accessible")
 
 ## Real-World Example: System Process Check
 
-Here's an actual trace from our agent when asked "Check if there is anything odd running on the system":
+Here's an actual trace from the agent when asked "Check if there is anything odd running on the system":
 
 ```mermaid
 sequenceDiagram
@@ -473,15 +473,15 @@ This prevents the agent from going off-script. If a network skill is active, it 
 
 ## Comparison to Anthropic's Implementation
 
-| Feature | Anthropic (Claude Code) | Our DSPy Implementation |
+| Feature | Anthropic (Claude Code) | DSPy Implementation     |
 |---------|------------------------|------------------------|
-| Skill format | SKILL.md + YAML frontmatter | Identical |
-| Progressive disclosure | Yes | Yes |
+| Skill format | SKILL.md + YAML frontmatter | Identical               |
+| Progressive disclosure | Yes | Yes                     |
 | Script execution | Yes (sandboxed) | Yes (firejail optional) |
-| Tool restrictions | `allowed-tools` field | `allowed-tools` field |
-| Forked context | Yes (`context: fork`) | Not yet implemented |
-| Model override | Yes (`model` field) | Not yet implemented |
-| Hooks | PreToolUse, PostToolUse, Stop | Not yet implemented |
+| Tool restrictions | `allowed-tools` field | `allowed-tools` field   |
+| Forked context | Yes (`context: fork`) | Not yet implemented     |
+| Model override | Yes (`model` field) | Not yet implemented     |
+| Hooks | PreToolUse, PostToolUse, Stop | Not yet implemented     |
 
 We've implemented the core specification. The advanced features (forked contexts, hooks) are on the roadmap.
 
@@ -491,4 +491,4 @@ We've implemented the core specification. The advanced features (forked contexts
 - [Agent Skills Specification](https://agentskills.io)
 - [Anthropic's Engineering Blog Post](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills)
 - [Claude Code Skills Documentation](https://docs.anthropic.com/en/docs/claude-code/skills)
-- [Our DSPy Implementation](https://github.com/ivanvza/dspy-skills)
+- [DSPy Implementation](https://github.com/ivanvza/dspy-skills)

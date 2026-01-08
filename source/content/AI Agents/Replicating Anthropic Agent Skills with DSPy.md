@@ -11,7 +11,7 @@ tags:
 draft: false
 ---
 
-Anthropic recently released their [Agent Skills specification](https://agentskills.io), a framework for teaching AI agents new capabilities through modular, reusable skill packages. It's the backbone of Claude Code's extensibility. We successfully replicated this architecture in DSPy, and in this post, I'll break down how it works and what we learned.
+Anthropic recently released their [Agent Skills specification](https://agentskills.io), a framework for teaching AI agents new capabilities through modular, reusable skill packages. It's the backbone of Claude Code's extensibility. I successfully replicated this architecture in DSPy, and in this post, I'll break down how it works and what I learned.
 
 ## The Problem with Monolithic Prompts
 
@@ -109,7 +109,7 @@ This mirrors how humans work. You don't hold every procedure manual in working m
 
 ## Our DSPy Implementation
 
-We built [dspy-skills](https://github.com/navcore/dspy-skills), a full implementation of the Agent Skills spec for DSPy's ReAct agents. Here's the architecture:
+I built [dspy-skills](https://github.com/ivanvza/dspy-skills), a full implementation of the Agent Skills spec for DSPy's ReAct agents. Here's the architecture:
 
 ```mermaid
 flowchart TB
@@ -198,7 +198,7 @@ class LoadedSkill:
 
 ### Meta-Tools: How the Agent Interacts
 
-We give the agent four tools to interact with skills:
+I give the agent four tools to interact with skills:
 
 | Tool | Purpose | When Used |
 |------|---------|-----------|
@@ -451,7 +451,7 @@ Include:
 
 ### 2. Progressive Disclosure Actually Works
 
-We tested with 20+ skills. Without progressive disclosure, context usage was ~40K tokens at startup. With it, ~2K tokens. The agent activates 1-2 skills per task on average.
+I tested with 20+ skills. Without progressive disclosure, context usage was ~40K tokens at startup. With it, ~2K tokens. The agent activates 1-2 skills per task on average.
 
 ### 3. Scripts > Generated Code
 
@@ -485,21 +485,10 @@ This prevents the agent from going off-script. If a network skill is active, it 
 
 We've implemented the core specification. The advanced features (forked contexts, hooks) are on the roadmap.
 
-## What's Next
-
-This implementation is open source. We're working on:
-
-1. **Skill marketplace**: Share and discover community skills
-2. **Forked contexts**: Run complex skills in isolated sub-agents
-3. **Skill composition**: Skills that use other skills
-4. **Evaluation framework**: Automated testing for skill quality
-
-The Agent Skills pattern is powerful because it's simple. A directory, a markdown file, and some scripts. No complex frameworks, no proprietary formats. Just files that teach agents what they can do.
-
 ---
 
 **Resources**:
 - [Agent Skills Specification](https://agentskills.io)
 - [Anthropic's Engineering Blog Post](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills)
 - [Claude Code Skills Documentation](https://docs.anthropic.com/en/docs/claude-code/skills)
-- [Our DSPy Implementation](https://github.com/navcore/dspy-skills)
+- [Our DSPy Implementation](https://github.com/ivanvza/dspy-skills)

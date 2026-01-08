@@ -323,28 +323,62 @@ agent = SkillsReActAgent(
 result = agent(request="Check if api.example.com port 443 is accessible")
 ```
 
-The agent's internal reasoning:
+## Real-World Example: System Process Check
 
+Here's an actual trace from our agent when asked "Check if there is anything odd running on the system":
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Agent
+    participant Skills as Skill Manager
+    participant Script as ScriptExecutor
+
+    User->>Agent: "Check if anything odd is running"
+
+    Note over Agent: Thought: I need system-level commands
+    Agent->>Skills: activate_skill("system_monitor")
+    Skills-->>Agent: ❌ Error: Skill not found
+
+    Note over Agent: Thought: Let me check available skills
+    Agent->>Skills: list_skills()
+    Skills-->>Agent: file-utils, json-tools, system-info...
+
+    Note over Agent: Thought: system-info can list processes
+    Agent->>Skills: activate_skill("system-info")
+    Skills-->>Agent: ✅ Full instructions loaded
+
+    Note over Agent: Thought: Use process_list.py
+    Agent->>Script: run_skill_script("system-info", "process_list.py")
+    Script-->>Agent: 535 processes listed
+
+    Note over Agent: Thought: Nothing unusual detected
+    Agent->>User: Process list shows normal activity
 ```
-Thought: User wants to check network connectivity. Let me see what skills are available.
-Action: list_skills()
-Observation: Available skills:
-  - network-check: Network connectivity testing toolkit...
-  - file-utils: File operations and management...
 
-Thought: network-check matches this task. Let me activate it.
-Action: activate_skill("network-check")
-Observation: # network-check - Activated
-  [Full instructions loaded]
-  Available Scripts: ping_host.py, check_port.py
+What's happening here:
 
-Thought: I should use check_port.py for this specific request.
-Action: run_skill_script("network-check", "check_port.py", "api.example.com 443")
-Observation: Port 443 on api.example.com is OPEN (response time: 45ms)
+1. **Failed guess**: The agent tried `system_monitor` (wrong name) and got an error
+2. **Recovery**: Instead of failing, it used `list_skills()` to discover available options
+3. **Correct activation**: Found `system-info` and activated it
+4. **Script execution**: Ran the bundled `process_list.py` script
+5. **Completion**: Analyzed results and responded
 
-Thought: I have the answer.
-Action: finish("Port 443 on api.example.com is accessible...")
-```
+This demonstrates the resilience of the skill discovery pattern—the agent self-corrects when it guesses wrong.
+
+### The Raw ReAct Trace
+
+Here's the actual thought/action/observation loop:
+
+| Step | Thought | Action | Result |
+|------|---------|--------|--------|
+| 0 | "I need system-level commands for checking processes" | `activate_skill("system_monitor")` | ❌ Skill not found |
+| 1 | "Let me list available skills" | `list_skills()` | 9 skills available |
+| 2 | "system-info can check processes" | `activate_skill("system-info")` | ✅ Instructions loaded |
+| 3 | "I'll use process_list.py" | `run_skill_script("system-info", "process_list.py")` | 535 processes listed |
+| 4 | "Nothing unusual in the output" | `finish()` | Done |
+
+**5 iterations**. The agent recovered from an error, found the right skill, executed a script, and delivered results. No human intervention required.
 
 ## Lessons Learned
 

@@ -13,6 +13,8 @@ draft: false
 
 Anthropic recently released their [Agent Skills specification](https://agentskills.io), a framework for teaching AI agents new capabilities through modular, reusable skill packages. It's the backbone of Claude Code's extensibility. I successfully replicated this architecture in DSPy, and in this post, I'll break down how it works and what I learned.
 
+code hosted here - https://github.com/ivanvza/dspy-skills
+
 ## The Problem with Monolithic Prompts
 
 When you build an LLM agent, you typically stuff everything into a system prompt:

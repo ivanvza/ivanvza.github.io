@@ -124,13 +124,21 @@ SUBMIT(result=f"Found {len(incidents['data'])} high-severity incidents")
 
 ## Building the MCPCodeInterpreter
 
-This is the essential piece. RLM expects an interpreter with a specific interface, but mcp-use just provides an `execute_code()` method. We need to build a bridge.
+Here's the problem: DSPy's RLM comes with built-in interpreters (Deno for TypeScript, Pyodide for Python), but they don't know anything about MCP. They can't call `await github.get_pull_request()` because that namespace-based syntax is specific to mcp-use's code_mode sandbox.
 
-The `MCPCodeInterpreter` must:
-1. Implement the interface RLM expects (`execute()`, `start()`, `shutdown()`, `tools`, `output_fields`)
-2. Inject a `SUBMIT()` function so the LLM can signal completion
-3. Detect when `SUBMIT()` is called and return a `FinalOutput` to stop iteration
-4. Delegate actual code execution to mcp-use's sandbox
+mcp-use's `code_mode` is what makes tools available as async functions via their server namespace:
+
+```python
+# This syntax only works inside mcp-use's execute_code() sandbox
+result = await log_analytics.execute_kql(kql_query="...")
+data = await github.list_issues(repo="...")
+```
+
+So we need a custom interpreter that:
+1. Implements the interface RLM expects (`execute()`, `start()`, `shutdown()`, `tools`, `output_fields`)
+2. Delegates actual execution to **mcp-use's sandbox** (where the namespace magic happens)
+3. Injects a `SUBMIT()` function so the LLM can signal completion
+4. Detects when `SUBMIT()` is called and returns a `FinalOutput` to stop iteration
 
 Here's the full implementation:
 
@@ -368,24 +376,38 @@ asyncio.run(main())
 
 ## RLM vs ReAct: When to Use Each
 
-| Aspect | ReAct | RLM |
-|--------|-------|-----|
+| Aspect | ReAct | RLM + Code Mode |
+|--------|-------|-----------------|
 | **Approach** | Pick one tool per step | Write code that calls tools |
-| **Flexibility** | Rigid format | Full Python expressiveness |
-| **Multi-step** | One tool at a time | Chain calls in single block |
-| **Data processing** | Limited | Full Python capabilities |
-| **Debugging** | Easier to trace | Requires reading code |
-| **Best for** | Simple workflows | Complex data gathering |
+| **Context usage** | All tool schemas loaded upfront | Progressive discovery (~98% reduction) |
+| **Multi-step** | One tool at a time, LLM sees each result | Chain calls in single block |
+| **Data processing** | Limited to tool outputs | Full Python capabilities |
+| **Observability** | LLM reasons about every intermediate result | Results processed in code, LLM sees summary |
+| **Best for** | Exploration, anomaly detection | Large toolsets, data aggregation |
+
+### The Big Win for RLM + Code Mode
+
+**Context efficiency.** With traditional ReAct, every tool schema gets loaded into the agent's context window. If you have 50+ tools with detailed parameters, that's tens of thousands of tokens before you even start. With code mode's progressive discovery, the agent searches for relevant tools on-demand, keeping context lean.
+
+### When ReAct Still Wins
+
+**The LLM sees everything.** In ReAct, the LLM observes each intermediate result and reasons about it before the next action. This matters when you're exploring unknown data or looking for anomalies.
+
+A deterministic Python script does exactly what it's told. If you write `incidents = await server.get_incidents(); high_sev = [i for i in incidents if i['severity'] == 'High']`, it filters strictly by severity. But what if there's an incident marked "Medium" that mentions "critical data exfiltration" in the description? The script misses it.
+
+In ReAct, the LLM sees the full output and might notice: "Wait, this Medium severity incident looks serious based on the description. Let me investigate further." That adaptive reasoning can catch things rigid code won't.
 
 **Use ReAct when:**
-- Simple, linear tool chains
-- You want explicit reasoning traces
-- Tools are straightforward
+- You're exploring unfamiliar data and don't know what to look for
+- Anomaly detection where unexpected patterns matter
+- You want explicit reasoning traces for auditing
+- The tool set is small enough that context isn't an issue
 
-**Use RLM when:**
-- Complex queries requiring data manipulation
-- Multiple related tool calls
-- You trust the LLM to write correct code
+**Use RLM + Code Mode when:**
+- Large tool catalogs that would flood the context window
+- Well-defined tasks with clear success criteria
+- Data aggregation across multiple sources
+- You need to filter/transform large result sets locally
 
 ## Lessons Learned
 

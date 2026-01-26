@@ -1,5 +1,5 @@
 ---
-title: "DSPy RLM with MCP Code Mode"
+title: DSPy RLM with MCP Code Mode
 date: 2026-01-26
 tags:
   - AI
@@ -9,14 +9,14 @@ tags:
   - RLM
   - MCP
   - code-execution
-draft: true
+draft: false
 ---
 
 DSPy's RLM (Reinforcement Language Model) module lets LLMs write Python code instead of picking tools one at a time. Combined with mcp_use's `code_mode`, this creates a powerful pattern: the LLM writes code that directly calls MCP tools as async Python functions.
 
 ## The Traditional Approach
 
-Most agent frameworks (including DSPy's ReAct) follow a rigid pattern:
+Most agent frameworks (including DSPy's ReAct) follow this kind of pattern:
 
 ```
 Thought: I need to search for users
@@ -37,7 +37,7 @@ This works, but it's **limiting**:
 
 The code mode concept was pioneered by [Cloudflare](https://blog.cloudflare.com/code-mode/) with a key insight: **LLMs have seen a lot of code, but they haven't seen a lot of "tool calls."**
 
-Traditional tool-calling relies on synthetic training data and special tokens that are unfamiliar to language models. But LLMs have been trained on millions of open-source projects—they're *really good* at writing code. So why not let them?
+Traditional tool-calling relies on synthetic training data and special tokens that are unfamiliar to language models. But LLMs have been trained on millions of open-source projects, they're *really good* at writing code. So why not let them?
 
 Cloudflare's approach converts MCP tool schemas into a TypeScript API, then asks the LLM to write code that calls that API. The code runs in a secure V8 isolate sandbox where the only external access is through the MCP bindings. This gives you:
 
@@ -63,7 +63,7 @@ data = await log_analytics.execute_kql(kql_query="SecurityAlert | take 10")
 
 Tool names are automatically sanitized to valid Python identifiers (`list-files` becomes `list_files`).
 
-The **progressive discovery** pattern is powerful: rather than pre-loading everything, agents use `search_tools(query)` to find relevant tools on-demand. This reduces context from 150k tokens to ~2k tokens—a **98.7% reduction**.
+The **progressive discovery** pattern is powerful: rather than pre-loading everything, agents use `search_tools(query)` to find relevant tools on-demand. This reduces context from 150k tokens to ~2k tokens, a **98.7% reduction**.
 
 ## Enter RLM: Code Generation Instead of Tool Selection
 
@@ -104,7 +104,7 @@ Key points:
 
 ## Combining RLM with MCP Code Mode
 
-Here's where it comes together. RLM needs a custom interpreter to execute the code it generates. mcp-use's code mode provides exactly that—a sandboxed environment where MCP tools are async functions.
+Here's where it comes together. RLM needs a custom interpreter to execute the code it generates. mcp-use's code mode provides exactly that, a sandboxed environment where MCP tools are async functions.
 
 The LLM can write code like:
 
@@ -278,7 +278,7 @@ When code fails, RLM shows the error to the LLM:
 Error: NameError: name 'foo' is not defined
 ```
 
-The LLM can then fix its code and try again. This iterative refinement is powerful—the LLM learns from its mistakes within the same task.
+The LLM can then fix its code and try again. This iterative refinement is powerful, the LLM learns from its mistakes within the same task.
 
 ## Putting It All Together
 
@@ -403,14 +403,14 @@ After building several agents with RLM + MCP, here are the key takeaways:
 
 ## Conclusion
 
-DSPy's RLM module combined with mcp-use's code mode is a powerful pattern. The insight from Cloudflare—that LLMs are better at writing code than making tool calls—plus mcp-use's Python implementation of code mode, plus DSPy's iterative refinement loop creates something greater than the sum of its parts.
+DSPy's RLM module combined with mcp-use's code mode is a powerful pattern. The insight from Cloudflare, that LLMs are better at writing code than making tool calls, plus mcp-use's Python implementation of code mode, plus DSPy's iterative refinement loop creates something greater than the sum of its parts.
 
 The MCPCodeInterpreter bridges RLM and MCP: it takes generated code, executes it in mcp-use's sandbox where tools are async functions, and returns results for the next iteration. The `SUBMIT()` pattern provides a clean way to signal completion.
 
-For complex tasks involving multiple data sources, filtering, and aggregation, this approach significantly outperforms traditional ReAct-style agents. The tradeoff is less visibility into reasoning—but when you need power over interpretability, code mode delivers.
+For complex tasks involving multiple data sources, filtering, and aggregation, this approach significantly outperforms traditional ReAct-style agents. The tradeoff is less visibility into reasoning, but when you need power over interpretability, code mode delivers.
 
 ## References
 
 - [Cloudflare: Code Mode](https://blog.cloudflare.com/code-mode/) - The original code mode concept
 - [mcp-use: Code Mode Documentation](https://mcp-use.com/docs/python/client/code-mode) - Python implementation
-- [DSPy RLM Documentation](https://dspy.ai/) - DSPy's Reinforcement Language Model
+- [DSPy RLM Documentation](https://dspy.ai/) or [RLM Source](https://github.com/stanfordnlp/dspy/blob/631085c01728dbe16102cb0d54fb7fe88d3a3f52/dspy/predict/rlm.py#L78) - DSPy's Reinforcement Language Model

@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "README.md",
+                "file": "source/content/AI Agents/DSPy RLM with MCP Code Mode.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "README"
+              "title": "DSPy RLM with MCP Code Mode"
             }
           }
         ]
@@ -196,6 +196,9 @@
   },
   "active": "f633a08f28890147",
   "lastOpenFiles": [
+    "README.md",
+    "source/content/AI Agents/DSPy RLM - Teaching LLMs to Write Code That Calls Tools.md",
+    "source/content/AI Agents/DSPy RLM with MCP Code Mode.md",
     "source/README.md",
     "source/content/index.md",
     "source/content/AI Agents/Replicating Anthropic Agent Skills with DSPy.md",
@@ -228,9 +231,6 @@
     "source/docs/plugins/index.md",
     "source/docs/plugins/Latex.md",
     "source/docs/plugins/RemoveDrafts.md",
-    "source/docs/plugins/RoamFlavoredMarkdown.md",
-    "source/docs/showcase.md",
-    "source/docs/upgrading.md",
     "source/docs/images/quartz-layout-tablet.png",
     "source/docs/images/quartz-layout-mobile.png",
     "source/docs/images/quartz-layout-desktop.png",

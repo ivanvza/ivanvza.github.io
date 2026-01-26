@@ -122,42 +122,124 @@ for incident in incidents['data']:
 SUBMIT(result=f"Found {len(incidents['data'])} high-severity incidents")
 ```
 
-## The MCPCodeInterpreter: Bridging RLM and MCP
+## Building the MCPCodeInterpreter
 
-To connect RLM with MCP's code execution, we need a custom interpreter. Here's the core implementation:
+This is the essential piece. RLM expects an interpreter with a specific interface, but mcp-use just provides an `execute_code()` method. We need to build a bridge.
+
+The `MCPCodeInterpreter` must:
+1. Implement the interface RLM expects (`execute()`, `start()`, `shutdown()`, `tools`, `output_fields`)
+2. Inject a `SUBMIT()` function so the LLM can signal completion
+3. Detect when `SUBMIT()` is called and return a `FinalOutput` to stop iteration
+4. Delegate actual code execution to mcp-use's sandbox
+
+Here's the full implementation:
 
 ```python
+import asyncio
+import json
+from typing import Any, Callable
+
+import nest_asyncio
+from mcp_use import MCPClient
+from dspy.primitives.code_interpreter import CodeInterpreterError, FinalOutput
+
+# Allow nested event loops (needed for sync interpreter inside async context)
+nest_asyncio.apply()
+
+
 class MCPCodeInterpreter:
-    """Custom CodeInterpreter that executes code via mcp_use."""
+    """Custom interpreter that bridges DSPy RLM with mcp-use's code execution."""
 
     def __init__(self, mcp_client: MCPClient):
         self.client = mcp_client
+        self._tools: dict[str, Callable[..., str]] = {}
         self._started = False
+        self.output_fields: list[dict] = []  # Required by RLM
+
+    @property
+    def tools(self) -> dict[str, Callable[..., str]]:
+        """RLM may set tools here, but we ignore them - tools come from MCP."""
+        return self._tools
+
+    @tools.setter
+    def tools(self, value: dict[str, Callable[..., str]]):
+        self._tools = value
+
+    def _run_async(self, coro):
+        """Run async code from sync context."""
+        loop = asyncio.get_event_loop()
+        return loop.run_until_complete(coro)
+
+    def start(self) -> None:
+        """Initialize MCP sessions."""
+        if not self._started:
+            self._run_async(self.client.create_all_sessions())
+            self._started = True
 
     def _inject_submit_function(self, code: str) -> str:
-        """Inject SUBMIT so the LLM can signal completion."""
+        """Inject SUBMIT() so the LLM can signal completion.
+
+        Returns a special dict marker that we detect in the result.
+        """
         submit_func = '''
 def SUBMIT(**kwargs):
+    """Call this when you have the final answer."""
     return {"__submit__": kwargs}
 '''
         return submit_func + "\n" + code
 
-    def execute(self, code: str, variables: dict | None = None) -> Any:
-        """Execute code and return results for RLM."""
+    def execute(self, code: str, variables: dict[str, Any] | None = None) -> Any:
+        """Execute code via mcp-use and return results for RLM.
+
+        This is the main interface called by RLM on each iteration.
+        """
+        self.start()
+
+        # Inject SUBMIT function
         code = self._inject_submit_function(code)
 
-        # Execute via mcp_use's sandbox
-        result = self._run_async(self.client.execute_code(code))
+        # Inject any variables from previous iterations
+        if variables:
+            injections = [f"{k} = {json.dumps(v)}" for k, v in variables.items()]
+            code = "\n".join(injections) + "\n" + code
 
-        # Check if LLM called SUBMIT
+        # Execute via mcp-use's sandbox
+        try:
+            result = self._run_async(self.client.execute_code(code, timeout=60.0))
+        except Exception as e:
+            raise CodeInterpreterError(f"MCP execution error: {e}")
+
+        # Handle errors
+        if result.get('error'):
+            error_msg = result['error']
+            if 'SyntaxError' in error_msg:
+                raise SyntaxError(error_msg)
+            raise CodeInterpreterError(error_msg)
+
+        # Check if LLM called SUBMIT() - this signals completion
         if isinstance(result.get('result'), dict) and '__submit__' in result['result']:
             return FinalOutput(result['result']['__submit__'])
 
-        # Otherwise, return output for next iteration
-        return self._format_output(result)
+        # Otherwise, format output for next iteration
+        output_parts = []
+        if result.get('logs'):
+            output_parts.extend(result['logs'])
+        if result.get('result') is not None:
+            if isinstance(result['result'], (dict, list)):
+                output_parts.append(json.dumps(result['result'], indent=2))
+            else:
+                output_parts.append(str(result['result']))
+
+        return "\n".join(output_parts) if output_parts else ""
+
+    def shutdown(self) -> None:
+        """Clean up MCP sessions."""
+        if self._started:
+            self._run_async(self.client.close_all_sessions())
+            self._started = False
 ```
 
-The key insight: we inject a `SUBMIT()` function that returns a special marker. When we see this marker in the output, we know the LLM is done and return a `FinalOutput` to RLM.
+The key insight: when the LLM calls `SUBMIT(result=...)`, it returns `{"__submit__": {"result": ...}}`. We detect this marker and wrap it in `FinalOutput`, which tells RLM to stop iterating and return the result.
 
 ## Key Components Explained
 
@@ -200,34 +282,88 @@ The LLM can then fix its code and try again. This iterative refinement is powerf
 
 ## Putting It All Together
 
-Here's a minimal working example:
+We need one more piece: a signature that tells the LLM what tools are available. We fetch this from mcp-use and build a dynamic signature:
 
 ```python
+async def get_tools_description(client: MCPClient) -> tuple[list[str], str]:
+    """Fetch available MCP tools and format them for the LLM."""
+    tools_info = await client.search_tools("", detail_level="descriptions")
+
+    # Filter out code_mode namespace (that's our execution environment)
+    tools = [t for t in tools_info['results'] if t['server'] != 'code_mode']
+    namespaces = [n for n in tools_info['meta']['namespaces'] if n != 'code_mode']
+
+    tools_description = "\n".join([
+        f"- {t['server']}.{t['name']}: {t.get('description', '')[:100]}"
+        for t in tools
+    ])
+    return namespaces, tools_description
+
+
+def build_signature(namespaces: list[str], tools_description: str) -> dspy.Signature:
+    """Build a signature with tool information baked into the instructions."""
+    instructions = f"""You write Python code to accomplish tasks using MCP tools.
+
+## Available Servers: {', '.join(namespaces)}
+
+## Tools:
+{tools_description}
+
+## How to Call Tools:
+result = await server_name.tool_name(param=value)
+print(result)  # See output
+
+## When Done:
+SUBMIT(result="Your answer here")
+"""
+    return dspy.Signature(
+        {"task": dspy.InputField(desc="The task to accomplish")},
+        instructions
+    ).append("result", dspy.OutputField(desc="The result"), type_=str)
+```
+
+Now the complete flow:
+
+```python
+import asyncio
 import dspy
 from mcp_use import MCPClient
 
 # Configure LLM
 dspy.configure(lm=dspy.LM("openai/gpt-4o"))
 
-# Setup
-client = MCPClient(config="config.json", code_mode=True)
-await client.create_all_sessions()
+async def main():
+    # Initialize mcp-use with code_mode enabled
+    client = MCPClient(config="config.json", code_mode=True)
+    await client.create_all_sessions()
 
-# Create interpreter
-interpreter = MCPCodeInterpreter(client)
+    try:
+        # Get available tools
+        namespaces, tools_desc = await get_tools_description(client)
 
-# Build signature with tool info
-signature = build_rlm_signature(namespaces, tools_description)
+        # Create our custom interpreter
+        interpreter = MCPCodeInterpreter(client)
+        interpreter._started = True  # Sessions already started
 
-# Create and run RLM
-rlm = dspy.RLM(
-    signature=signature,
-    interpreter=interpreter,
-    max_iterations=10
-)
+        # Build signature with tool info
+        signature = build_signature(namespaces, tools_desc)
 
-result = await rlm.aforward(task="Find high-severity incidents")
-print(result.result)
+        # Create RLM with our interpreter
+        rlm = dspy.RLM(
+            signature=signature,
+            interpreter=interpreter,
+            max_iterations=10,
+            verbose=True
+        )
+
+        # Run it
+        result = await rlm.aforward(task="Find high-severity incidents")
+        print(result.result)
+
+    finally:
+        await client.close_all_sessions()
+
+asyncio.run(main())
 ```
 
 ## RLM vs ReAct: When to Use Each

@@ -266,10 +266,12 @@ Without `SUBMIT()`, the code output goes back to the LLM for another iteration. 
 
 ### 2. Variable Scoping
 
-Important: variables don't persist between code executions. Each `execute()` call is a fresh environment. The LLM must do everything in a single code block:
+**Important caveat:** DSPy's default RLM interpreters maintain state between iterations, but mcp-use's `execute_code()` sandbox does **not**. Each call is a fresh environment—variables don't persist.
+
+This means the LLM must do everything in a single code block:
 
 ```python
-# WRONG - variables don't persist:
+# WRONG - variables don't persist between execute_code() calls:
 # Block 1: data = await server.fetch()
 # Block 2: SUBMIT(result=data)  # Error: 'data' not defined!
 
@@ -277,6 +279,8 @@ Important: variables don't persist between code executions. Each `execute()` cal
 data = await server.fetch()
 SUBMIT(result=data)
 ```
+
+Make sure your signature instructions clearly tell the LLM to complete its work (including `SUBMIT()`) in one code block.
 
 ### 3. Error Handling
 

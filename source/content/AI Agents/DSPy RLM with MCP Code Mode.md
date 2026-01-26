@@ -1,5 +1,5 @@
 ---
-title: "DSPy RLM: Teaching LLMs to Write Code That Calls Tools"
+title: "DSPy RLM with MCP Code Mode"
 date: 2026-01-26
 tags:
   - AI
@@ -12,9 +12,9 @@ tags:
 draft: true
 ---
 
-Traditional AI agents use a simple loop: think, pick a tool, call it, repeat. But what if we could let the LLM write actual Python code that calls tools directly? That's what DSPy's RLM (Reinforcement Language Model) module enables, and when combined with MCP's code execution mode, it becomes remarkably powerful.
+DSPy's RLM (Reinforcement Language Model) module lets LLMs write Python code instead of picking tools one at a time. Combined with mcp_use's `code_mode`, this creates a powerful pattern: the LLM writes code that directly calls MCP tools as async Python functions.
 
-## The Problem with Traditional Tool Calling
+## The Traditional Approach
 
 Most agent frameworks (including DSPy's ReAct) follow a rigid pattern:
 

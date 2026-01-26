@@ -266,7 +266,7 @@ Without `SUBMIT()`, the code output goes back to the LLM for another iteration. 
 
 ### 2. Variable Scoping
 
-**Important caveat:** DSPy's default RLM interpreters maintain state between iterations, but mcp-use's `execute_code()` sandbox does **not**. Each call is a fresh environment—variables don't persist.
+**Important caveat:** DSPy's default RLM interpreters maintain state between iterations, but mcp-use's `execute_code()` sandbox does **not**. Each call is a fresh environment, variables don't persist sadly.
 
 This means the LLM must do everything in a single code block:
 

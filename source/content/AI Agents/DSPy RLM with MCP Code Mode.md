@@ -74,7 +74,7 @@ RLM flips the paradigm. Instead of asking the LLM to choose which tool to call, 
 users = await server.search_users(name="john")
 active_users = [u for u in users if u['status'] == 'active']
 details = await server.get_user_details(user_id=active_users[0]['id'])
-SUBMIT(result=f"Found {len(active_users)} active users. First: {details['name']}")
+return SUBMIT(result=f"Found {len(active_users)} active users. First: {details['name']}")
 ```
 
 This is more natural, more flexible, and often more efficient.
@@ -119,7 +119,7 @@ for incident in incidents['data']:
     print(f"Incident {incident['id']}: {incident['title']}")
 
 # Submit findings
-SUBMIT(result=f"Found {len(incidents['data'])} high-severity incidents")
+return SUBMIT(result=f"Found {len(incidents['data'])} high-severity incidents")
 ```
 
 ## Building the MCPCodeInterpreter
@@ -196,12 +196,23 @@ def SUBMIT(**kwargs):
 '''
         return submit_func + "\n" + code
 
+    def _strip_markdown_fences(self, code: str) -> str:
+        """Strip markdown code fences if the LLM wrapped the code in them."""
+        import re
+        # Match ```python or ``` at start, and ``` at end
+        pattern = r'^```(?:python)?\s*\n?(.*?)\n?```$'
+        match = re.match(pattern, code.strip(), re.DOTALL)
+        return match.group(1) if match else code
+
     def execute(self, code: str, variables: dict[str, Any] | None = None) -> Any:
         """Execute code via mcp-use and return results for RLM.
 
         This is the main interface called by RLM on each iteration.
         """
         self.start()
+
+        # Strip markdown code fences if present (LLMs often wrap code in ```)
+        code = self._strip_markdown_fences(code)
 
         # Inject SUBMIT function
         code = self._inject_submit_function(code)
@@ -259,7 +270,7 @@ The `SUBMIT()` function is how the LLM signals "I have the answer":
 # LLM generates this code:
 data = await server.fetch_data(query="...")
 analysis = process_data(data)
-SUBMIT(result=f"Analysis complete: {analysis}")
+return SUBMIT(result=f"Analysis complete: {analysis}")
 ```
 
 Without `SUBMIT()`, the code output goes back to the LLM for another iteration. This lets the LLM explore, gather data across multiple iterations, and only commit when ready.
@@ -273,11 +284,11 @@ This means the LLM must do everything in a single code block:
 ```python
 # WRONG - variables don't persist between execute_code() calls:
 # Block 1: data = await server.fetch()
-# Block 2: SUBMIT(result=data)  # Error: 'data' not defined!
+# Block 2: return return SUBMIT(result=data)  # Error: 'data' not defined!
 
 # CORRECT - everything in one block:
 data = await server.fetch()
-SUBMIT(result=data)
+return SUBMIT(result=data)
 ```
 
 Make sure your signature instructions clearly tell the LLM to complete its work (including `SUBMIT()`) in one code block.
@@ -325,8 +336,11 @@ def build_signature(namespaces: list[str], tools_description: str) -> dspy.Signa
 result = await server_name.tool_name(param=value)
 print(result)  # See output
 
-## When Done:
-SUBMIT(result="Your answer here")
+## CRITICAL - When Done:
+You MUST use 'return' with SUBMIT:
+return SUBMIT(result="Your answer here")
+
+Do NOT just call SUBMIT() - you MUST return it!
 """
     return dspy.Signature(
         {"task": dspy.InputField(desc="The task to accomplish")},

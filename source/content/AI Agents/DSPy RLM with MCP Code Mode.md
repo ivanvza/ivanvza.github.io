@@ -284,7 +284,7 @@ This means the LLM must do everything in a single code block:
 ```python
 # WRONG - variables don't persist between execute_code() calls:
 # Block 1: data = await server.fetch()
-# Block 2: return return SUBMIT(result=data)  # Error: 'data' not defined!
+# Block 2: return SUBMIT(result=data)  # Error: 'data' not defined!
 
 # CORRECT - everything in one block:
 data = await server.fetch()

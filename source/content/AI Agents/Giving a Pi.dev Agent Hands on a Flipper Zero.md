@@ -12,7 +12,7 @@ tags:
 draft: false
 ---
 
-I wanted to stop asking my AI agent to summarise documents and start asking it to poke at the real world. The Flipper Zero was the obvious first stop — it talks SubGHz radio, NFC, RFID, infrared, GPIO, and USB HID, and it plugs into a laptop like a boring serial device.
+I wanted to stop asking my AI agent to summarise documents and start asking it to poke at the real world. The Flipper Zero was the obvious first stop, it talks SubGHz radio, NFC, RFID, infrared, GPIO, and USB HID, and it plugs into a laptop like a boring serial device.
 
 So I built two [Pi](https://github.com/badlogic/pi-mono) extensions. Both let the agent drive the Flipper. One is simple and text-based. The other is structured and binary. By the end of the weekend the agent had detected what looks like a live cellular signal at **891 MHz**, and I had a strong opinion about which extension wins.
 
@@ -23,6 +23,25 @@ This post is written in plain English. No RF background needed.
 Think of an AI agent as a brain in a jar. It's great at thinking, reading, and writing. It is not, by itself, great at touching things. An **extension** is a pair of hands: a small program that exposes a few actions the agent can call, and translates the agent's text into something a real device can understand.
 
 Pi is the jar. The Flipper Zero is the thing to touch. I just had to wire up the hands.
+
+### Getting started in about 30 seconds
+
+The whole onboarding looks like this:
+
+1. Plug your Flipper Zero into a USB port.
+2. Unlock it (the Flipper needs to be awake at the main menu, not sitting on the lock screen).
+3. In your terminal, run the extension directly with Pi:
+
+   ```bash
+   pi -e https://github.com/ivanvza/pi-flipper-hid
+   ```
+4. Pi opens its TUI. Type in the prompt:
+
+   ```
+   flipper connect
+   ```
+
+That's it. Pi pulls the extension, registers the `flipper` tool, the agent connects to the device, and you can start asking it to do things.
 
 ## Two sets of hands
 
@@ -37,10 +56,10 @@ flowchart LR
     D -->|USB serial @ 230400 baud| E[Flipper RPC<br/>protobuf]
 ```
 
-- **[pi-flipper-hid](https://github.com/ivanvza/pi-flipper-hid)** — talks to the Flipper's built-in command-line interface over USB serial. The agent says `device_info`, the Flipper replies in text. That's it.
-- **[pi-flipper-rpc](https://github.com/ivanvza/pi-flipper-rpc)** — same USB cable, but switches the Flipper into its binary RPC mode and speaks protobuf. Typed requests, typed responses, explicit error codes, and it can even pull the Flipper's 128×64 OLED screen back as ASCII art.
+- **[pi-flipper-hid](https://github.com/ivanvza/pi-flipper-hid)**, talks to the Flipper's built-in command-line interface over USB serial. The agent says `device_info`, the Flipper replies in text. That's it.
+- **[pi-flipper-rpc](https://github.com/ivanvza/pi-flipper-rpc)**, same USB cable, but switches the Flipper into its binary RPC mode and speaks protobuf. Typed requests, typed responses, explicit error codes, and it can even pull the Flipper's 128×64 OLED screen back as ASCII art.
 
-One quick naming confession: **the HID repo isn't actually USB HID.** The Flipper exposes itself as a USB-CDC serial device — a "virtual COM port". The name is a leftover from an earlier experiment and I've been too lazy to rename the repo. It is 100% serial.
+One quick naming confession: **the HID repo isn't actually USB HID.** The Flipper exposes itself as a USB-CDC serial device, a "virtual COM port". The name is a leftover from an earlier experiment and I've been too lazy to rename the repo. It is 100% serial.
 
 ## The text one: pi-flipper-hid
 
@@ -76,13 +95,13 @@ Text in, text out. LLMs love this.
 
 Both extensions ship with the same small piece of code that turned out to be the most useful thing I wrote on the whole project: a **pre-upload linter** for JavaScript files.
 
-Here's why it matters. The Flipper Zero has a minimal JavaScript engine called **mjs**. It's tiny. It doesn't support `const`. It doesn't support arrow functions. It doesn't support `try/catch`. It doesn't have `Math` unless you `require("math")`. Template literals — nope. `async/await` — forget it.
+Here's why it matters. The Flipper Zero has a minimal JavaScript engine called **mjs**. It's tiny. It doesn't support `const`. It doesn't support arrow functions. It doesn't support `try/catch`. It doesn't have `Math` unless you `require("math")`. Template literals, nope. `async/await`, forget it.
 
 The agent, trained on roughly one billion npm packages, does *not* know that when it writes a Flipper script. So it writes perfectly modern JavaScript, we upload it, the Flipper silently chokes, nothing runs, and the agent is left staring at an empty output wondering what went wrong.
 
-Before the linter, its feedback loop was essentially *"it didn't work, try again."* That is the worst possible signal to give an LLM — with no clue what to change, it just scrambles.
+Before the linter, its feedback loop was essentially *"it didn't work, try again."* That is the worst possible signal to give an LLM, with no clue what to change, it just scrambles.
 
-With the linter in place, the `write_file` action **type-checks the script against the official fz-sdk TypeScript declarations before sending a single byte** to the Flipper. When the check fails, the agent sees something like this — these are real, verbatim outputs from my sessions:
+With the linter in place, the `write_file` action **type-checks the script against the official fz-sdk TypeScript declarations before sending a single byte** to the Flipper. When the check fails, the agent sees something like this, these are real, verbatim outputs from my sessions:
 
 ```
 mjs issues (1):
@@ -113,8 +132,8 @@ You get 17 actions instead of 6. A few examples:
 - `device_info`, `power_info`
 - `storage_list`, `storage_read`, `storage_write`, `storage_rename`, `storage_stat`…
 - `app_start`, `app_exit`
-- `gui_input` — press UP/DOWN/LEFT/RIGHT/OK/BACK
-- `gui_screen` — grab the 128×64 OLED as ASCII block characters
+- `gui_input`, press UP/DOWN/LEFT/RIGHT/OK/BACK
+- `gui_screen`, grab the 128×64 OLED as ASCII block characters
 
 The RPC version has some genuine wins. Errors come back as one of 25 explicit status codes instead of text you have to parse. File uploads are chunked to 512 bytes automatically. And it can **see the screen**, which the CLI approach simply cannot do.
 
@@ -143,7 +162,7 @@ My take: use CLI by default, reach for RPC only when the task genuinely needs to
 
 Here's the bit that made the whole project feel worth it.
 
-I asked the agent to write a SubGHz scanner — something that sweeps across frequencies, samples signal strength at each step, and reports which ones look alive. First attempt, the agent confidently wrote modern JavaScript. The linter said no:
+I asked the agent to write a SubGHz scanner, something that sweeps across frequencies, samples signal strength at each step, and reports which ones look alive. First attempt, the agent confidently wrote modern JavaScript. The linter said no:
 
 ```
 mjs issues (1):
@@ -159,11 +178,11 @@ So I asked:
 
 > **me:** what frequency range is GSM/LTE?
 
-The agent came back with a clean breakdown: GSM/LTE spans roughly 700–2700 MHz across all bands, but the Flipper's SubGHz radio only covers ~300–960 MHz — so it can only potentially catch the lower cellular bands: GSM 850, GSM 900, LTE Band 8, LTE Band 20.
+The agent came back with a clean breakdown: GSM/LTE spans roughly 700–2700 MHz across all bands, but the Flipper's SubGHz radio only covers ~300–960 MHz, so it can only potentially catch the lower cellular bands: GSM 850, GSM 900, LTE Band 8, LTE Band 20.
 
 > **me:** let's see if we get something on those lower bands
 
-It rewrote the scanner to cover 824–960 MHz, bumped the dwell time to 2 seconds per frequency, and lowered the detection threshold. Second run, the Flipper printed this — verbatim from the serial output:
+It rewrote the scanner to cover 824–960 MHz, bumped the dwell time to 2 seconds per frequency, and lowered the detection threshold. Second run, the Flipper printed this, verbatim from the serial output:
 
 ```
 === DEEP GSM/LTE Signal Hunter ===
@@ -191,9 +210,9 @@ And the agent's analysis, verbatim:
 > - It has a **delta of 5.8 dBm** spike above average - characteristic of intermittent transmission
 > - This could be a nearby **cell tower**, **GSM device**, or **LTE signal**
 
-That 891 MHz hit sits squarely in GSM 900 / LTE Band 8, which is an actual cellular band used across most of Europe and large parts of Asia. The 5.8 dB spike above the noise floor — on the second pass, not the first — is exactly what intermittent cellular traffic looks like. 312 MHz was almost certainly noise.
+That 891 MHz hit sits squarely in GSM 900 / LTE Band 8, which is an actual cellular band used across most of Europe and large parts of Asia. The 5.8 dB spike above the noise floor, on the second pass, not the first, is exactly what intermittent cellular traffic looks like. 312 MHz was almost certainly noise.
 
-To be crystal clear: this is **detection only**. A $35 Flipper Zero cannot demodulate or decode GSM. It can just point at the sky and say *"there's something energetic over there."* But it's a wild thing to watch an AI do on its own — plan a sweep, get nothing, reason about the physics, adjust the parameters, and find a real signal.
+To be crystal clear: this is **detection only**. A $35 Flipper Zero cannot demodulate or decode GSM. It can just point at the sky and say *"there's something energetic over there."* But it's a wild thing to watch an AI do on its own, plan a sweep, get nothing, reason about the physics, adjust the parameters, and find a real signal.
 
 ## Lessons learned
 
@@ -203,19 +222,10 @@ To be crystal clear: this is **detection only**. A $35 Flipper Zero cannot demod
 - **Small, narrow actions beat god-tools.** Six narrow CLI verbs worked better than seventeen typed RPC actions for everything except UI navigation.
 - **Timing matters.** Quiet-period prompt detection and the 30 s keepalive were both "obviously right" in hindsight and absolutely necessary in practice.
 
-## What's next
-
-I want to push this further. NFC reads and writes, BadUSB scripts for authorised testing, infrared probing, and eventually a SubGHz *replay* workflow. I'm also tempted to build a hybrid: CLI by default, but let the agent briefly flip into RPC mode when it genuinely needs to see the screen.
-
-If you want to try either extension yourself, clone them, add them to your Pi config, and make sure your user is in `dialout`:
-
-- [pi-flipper-hid](https://github.com/ivanvza/pi-flipper-hid)
-- [pi-flipper-rpc](https://github.com/ivanvza/pi-flipper-rpc)
-
 ## References
 
-- [Pi (pi-mono) — the agent framework](https://github.com/badlogic/pi-mono)
+- [Pi (pi-mono), the agent framework](https://github.com/badlogic/pi-mono)
 - [pi-flipper-hid](https://github.com/ivanvza/pi-flipper-hid)
 - [pi-flipper-rpc](https://github.com/ivanvza/pi-flipper-rpc)
 - [Flipper Zero protobuf definitions](https://github.com/flipperdevices/flipperzero-protobuf)
-- [Flipper Zero firmware & fz-sdk TypeScript declarations](https://github.com/flipperdevices/flipperzero-firmware) — the authoritative API the mjs linter type-checks against
+- [Flipper Zero firmware & fz-sdk TypeScript declarations](https://github.com/flipperdevices/flipperzero-firmware), the authoritative API the mjs linter type-checks against
